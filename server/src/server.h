@@ -1,5 +1,5 @@
-#ifndef _NETWORKING_H_
-#define _NETWORKING_H_
+#ifndef _SERVER_H_
+#define _SERVER_H_
 
 #include "clients.h"
 

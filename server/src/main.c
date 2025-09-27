@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include "networking.h"
+#include "server.h"
 
 int main() {
     Server server = create_server();
