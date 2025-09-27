@@ -6,6 +6,7 @@
 #ifndef _CLIENTS_H_
 #define _CLIENTS_H_
 
+#include "config.h"
 #include <stdint.h>
 #if defined(__has_include) // mainly bcs of linting issues
     #if __has_include(<uchar.h>)
@@ -16,9 +17,6 @@
 #else
     typedef uint32_t char32_t;
 #endif
-
-#define MAX_NAME_LENGTH 256
-#define MAX_CLIENTS 1000
 
 typedef struct Client {
     int sock;
