@@ -8,8 +8,8 @@ TARGET = server
 
 all: $(BIN)/$(TARGET)
 
-$(BIN)/$(TARGET): $(SRC)/main.c | $(BIN)
-	$(CC) $(CFLAGS) -o $@ $<
+$(BIN)/$(TARGET): $(SRC)/main.c $(SRC)/networking.c $(SRC)/clients.c | $(BIN)
+	$(CC) $(CFLAGS) -o $@ $(SRC)/main.c $(SRC)/networking.c $(SRC)/clients.c
 
 $(BIN):
 	mkdir -p $(BIN)

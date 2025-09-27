@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include "networking.h"
 
-int main(int argc, char* argv[]) {
-    printf("hello world\n");
+int main() {
+    Server server = create_server();
+    destroy_server(&server);
     return 0;
 }
