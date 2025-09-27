@@ -1,4 +1,5 @@
 #include "server.h"
+#include "clients.h"
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,4 +43,20 @@ Server create_server() {
 void destroy_server(Server* server) {
     close(server->sock);
     destroy_client_container(&server->clients);
+}
+
+void run_server(Server* server) {
+    printf("run_server: running server on port %d\n", PORT);
+    while (1) {
+        struct sockaddr_in sock;
+        socklen_t sock_len = sizeof(sock);
+        int sock_fd = accept(server->sock, (struct sockaddr*)&sock, &sock_len);
+        if (sock_fd == -1) {
+            perror("run_server: accept failed");
+            continue;
+        }
+        
+        printf("run_server: accepted connection from %s\n", inet_ntoa(sock.sin_addr));
+        add_client(&server->clients, sock_fd, U"Anonymous");
+    }
 }

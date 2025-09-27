@@ -29,7 +29,7 @@ void destroy_client_container(Clients* clients) {
 int add_client(
     Clients* clients, 
     int sock, 
-    char32_t name[MAX_NAME_LENGTH]
+    const char32_t name[MAX_NAME_LENGTH]
 ) {
     if (
         sock < 0 || sock >= MAX_CLIENTS ||
@@ -58,7 +58,7 @@ int add_client(
 void update_nickname(
     Clients* clients, 
     int sock, 
-    char32_t name[MAX_NAME_LENGTH]
+    const char32_t name[MAX_NAME_LENGTH]
 ) {
     if (
         clients->connected[sock] == NULL ||

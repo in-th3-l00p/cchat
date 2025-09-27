@@ -10,5 +10,6 @@ typedef struct {
 
 Server create_server();
 void destroy_server(Server* server);
+void run_server(Server* server);
 
 #endif
