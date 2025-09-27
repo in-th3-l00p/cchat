@@ -34,6 +34,8 @@ Server create_server() {
         exit(1);
     }
 
+    server.clients = create_client_container();
+
     return server;
 }
 

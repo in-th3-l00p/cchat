@@ -3,13 +3,14 @@ CFLAGS = -Wall -Wextra -O2
 SRC = src
 BIN = bin
 TARGET = server
+SRCS = $(wildcard $(SRC)/*.c)
 
 .PHONY: all clean
 
 all: $(BIN)/$(TARGET)
 
-$(BIN)/$(TARGET): $(SRC)/main.c $(SRC)/networking.c $(SRC)/clients.c | $(BIN)
-	$(CC) $(CFLAGS) -o $@ $(SRC)/main.c $(SRC)/networking.c $(SRC)/clients.c
+$(BIN)/$(TARGET): $(SRCS) | $(BIN)
+	$(CC) $(CFLAGS) -o $@ $(SRCS)
 
 $(BIN):
 	mkdir -p $(BIN)
