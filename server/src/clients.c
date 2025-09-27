@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
+#include <stdio.h>
 
 Clients create_client_container() {
     Clients clients = {0};
@@ -29,13 +31,21 @@ int add_client(
     int sock, 
     char32_t name[MAX_NAME_LENGTH]
 ) {
-    if (sock < 0 || sock >= MAX_CLIENTS)
+    if (
+        sock < 0 || sock >= MAX_CLIENTS ||
+        clients->count >= MAX_CLIENTS || 
+        clients->connected[sock] != NULL
+    ) {
+        perror("add_client: socket fd out of range");
+        errno = EINVAL;
         return -1;
-    if (clients->count >= MAX_CLIENTS || clients->connected[sock] != NULL)
-        return -1;
+    }
     clients->connected[sock] = malloc(sizeof(Client));
-    if (clients->connected[sock] == NULL)
+    if (clients->connected[sock] == NULL) {
+        perror("add_client: malloc failed");
+        errno = ENOMEM;
         return -1;
+    }
     clients->connected[sock]->sock = sock;
     memcpy(clients->connected[sock]->name, name, sizeof(char32_t) * MAX_NAME_LENGTH);
     clients->connected[sock]->name[MAX_NAME_LENGTH - 1] = U'\0';
@@ -50,14 +60,26 @@ void update_nickname(
     int sock, 
     char32_t name[MAX_NAME_LENGTH]
 ) {
-    if (clients->connected[sock] == NULL)
+    if (
+        clients->connected[sock] == NULL ||
+        sock < 0 || sock >= MAX_CLIENTS
+    ) {
+        perror("update_nickname: client not found");
+        errno = EINVAL;
         return;
+    }
     memcpy(clients->connected[sock]->name, name, sizeof(char32_t) * MAX_NAME_LENGTH);
 }
 
 void remove_client(Clients* clients, int sock) {
-    if (clients->connected[sock] == NULL)
+    if (
+        clients->connected[sock] == NULL ||
+        sock < 0 || sock >= MAX_CLIENTS
+    ) {
+        perror("remove_client: client not found");
+        errno = EINVAL;
         return;
+    }
     close(clients->connected[sock]->sock);
     free(clients->connected[sock]);
     clients->connected[sock] = NULL;
