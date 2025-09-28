@@ -80,7 +80,11 @@ void run_server(Server* server) {
             if (FD_ISSET(server->sock, &read_fds)) {
                 struct sockaddr_in sock;
                 socklen_t sock_len = sizeof(sock);
-                int sock_fd = accept(server->sock, (struct sockaddr*)&sock, &sock_len);
+                int sock_fd = accept(
+                    server->sock, 
+                    (struct sockaddr*)&sock, 
+                    &sock_len
+                );
                 if (sock_fd == -1) {
                     perror("run_server: accept failed");
                     continue;
