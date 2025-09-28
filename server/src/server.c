@@ -93,6 +93,23 @@ void run_server(Server* server) {
                 printf("run_server: accepted connection from %s\n", inet_ntoa(sock.sin_addr));
                 add_client(&server->clients, sock_fd, U"");
             }
+
+            for (int i = 0; i < MAX_CLIENTS; i++) {
+                if (server->clients.connected[i] == NULL)
+                    continue;
+
+                if (FD_ISSET(server->clients.connected[i]->sock, &read_fds)) {
+                    printf("run_server: client %d is ready to read\n", i);
+                    char buffer[1024];
+                    ssize_t bytes_read = read(server->clients.connected[i]->sock, buffer, sizeof(buffer));
+                    if (bytes_read == -1) {
+                        perror("run_server: read failed");
+                        continue;
+                    }
+                    printf("run_server: client %d sent %s\n", i, buffer);
+                    send(server->clients.connected[i]->sock, buffer, bytes_read, 0);
+                }
+            }
         }
     }
 }
