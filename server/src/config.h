@@ -5,5 +5,6 @@
 #define MAX_NAME_LENGTH 256
 #define MAX_CLIENTS 1000
 #define BACKLOG 511
+#define MAX_MESSAGE_LENGTH 65536
 
 #endif

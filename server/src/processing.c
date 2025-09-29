@@ -1,5 +1,8 @@
 #include "processing.h"
 #include "config.h"
+#include "client_processing.h"
+#include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,7 +42,7 @@ static inline fd_set get_read_fds(Server* server) {
     return read_fds;
 }
 
-static inline void handle_server_socket(
+static inline void process_server_socket(
     fd_set* read_fds, 
     Server* server
 ) {
@@ -56,34 +59,15 @@ static inline void handle_server_socket(
     add_client(&server->clients, sock_fd, U"");
 }
 
-static inline void handle_client_socket(
-    fd_set* read_fds, 
-    Server* server, 
-    int client_index
-) {
-    if (server->clients.connected[client_index] == NULL)
-        return;
-    if (!FD_ISSET(server->clients.connected[client_index]->sock, read_fds))
-        return;
-    printf("process_server: client %d is ready to read\n", client_index);
-    char buffer[1024];
-    ssize_t bytes_read = read(server->clients.connected[client_index]->sock, buffer, sizeof(buffer));
-    if (bytes_read == -1) {
-        perror("process_server: read failed");
-        return;
-    }
-    printf("process_server: client %d sent %s\n", client_index, buffer);
-    send(server->clients.connected[client_index]->sock, buffer, bytes_read, 0);
-}
 
-static inline void handle_clients_socket(
+static inline void process_clients_socket(
     fd_set* read_fds, 
     Server* server
 ) {
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (server->clients.connected[i] != NULL) {
             if (FD_ISSET(server->clients.connected[i]->sock, read_fds)) {
-                handle_client_socket(read_fds, server, i);
+                process_client(read_fds, server, i);
             }
         }
     }
@@ -91,6 +75,6 @@ static inline void handle_clients_socket(
 
 void process_server(Server* server) {
     fd_set read_fds = get_read_fds(server);
-    handle_server_socket(&read_fds, server);
-    handle_clients_socket(&read_fds, server);
+    process_server_socket(&read_fds, server);
+    process_clients_socket(&read_fds, server);
 }

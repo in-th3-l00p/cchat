@@ -21,6 +21,12 @@
 typedef struct Client {
     int sock;
     char32_t name[MAX_NAME_LENGTH];
+    uint8_t header_buf[4];
+    uint32_t header_bytes_read;
+    uint8_t* payload_buf;
+    uint32_t payload_capacity;
+    uint32_t payload_length;
+    uint32_t payload_bytes_read;
 } Client;
 
 // key -> value store of the connected

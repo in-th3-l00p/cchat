@@ -19,6 +19,11 @@ void destroy_client_container(Clients* clients) {
             continue;
         }
         close(clients->connected[i]->sock);
+        if (clients->connected[i]->payload_buf != NULL) {
+            free(clients->connected[i]->payload_buf);
+            clients->connected[i]->payload_buf = NULL;
+            clients->connected[i]->payload_capacity = 0;
+        }
         free(clients->connected[i]);
         clients->connected[i] = NULL;
     }
@@ -49,6 +54,11 @@ int add_client(
     clients->connected[sock]->sock = sock;
     memcpy(clients->connected[sock]->name, name, sizeof(char32_t) * MAX_NAME_LENGTH);
     clients->connected[sock]->name[MAX_NAME_LENGTH - 1] = U'\0';
+    clients->connected[sock]->header_bytes_read = 0;
+    clients->connected[sock]->payload_buf = NULL;
+    clients->connected[sock]->payload_capacity = 0;
+    clients->connected[sock]->payload_length = 0;
+    clients->connected[sock]->payload_bytes_read = 0;
     clients->count++;
     if (sock > clients->max_fd)
         clients->max_fd = sock;
@@ -81,6 +91,11 @@ void remove_client(Clients* clients, int sock) {
         return;
     }
     close(clients->connected[sock]->sock);
+    if (clients->connected[sock]->payload_buf != NULL) {
+        free(clients->connected[sock]->payload_buf);
+        clients->connected[sock]->payload_buf = NULL;
+        clients->connected[sock]->payload_capacity = 0;
+    }
     free(clients->connected[sock]);
     clients->connected[sock] = NULL;
     clients->count--;
