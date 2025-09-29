@@ -1,6 +1,7 @@
 #include "server.h"
 #include "clients.h"
 #include "config.h"
+#include "processing.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,69 +48,6 @@ void destroy_server(Server* server) {
 
 void run_server(Server* server) {
     printf("run_server: running server on port %d\n", PORT);
-    while (1) {
-        fd_set read_fds;
-        FD_ZERO(&read_fds);
-        FD_SET(server->sock, &read_fds);
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (server->clients.connected[i] != NULL) {
-                FD_SET(server->clients.connected[i]->sock, &read_fds);
-            }
-        }
-
-        int max_fd = server->clients.max_fd;
-        if (server->clients.max_fd < 0)
-            max_fd = server->sock;
-        max_fd++;
-
-        int activity = select(
-            max_fd, 
-            &read_fds, 
-            NULL, 
-            NULL, 
-            NULL
-        );
-
-        if (activity < 0) {
-            perror("run_server: select failed");
-            continue;
-        } else if (activity == 0) {
-            printf("run_server: select timed out\n");
-            continue;
-        } else {
-            if (FD_ISSET(server->sock, &read_fds)) {
-                struct sockaddr_in sock;
-                socklen_t sock_len = sizeof(sock);
-                int sock_fd = accept(
-                    server->sock, 
-                    (struct sockaddr*)&sock, 
-                    &sock_len
-                );
-                if (sock_fd == -1) {
-                    perror("run_server: accept failed");
-                    continue;
-                }
-                
-                printf("run_server: accepted connection from %s\n", inet_ntoa(sock.sin_addr));
-                add_client(&server->clients, sock_fd, U"");
-            }
-
-            for (int i = 0; i < MAX_CLIENTS; i++) {
-                if (server->clients.connected[i] == NULL)
-                    continue;
-
-                if (FD_ISSET(server->clients.connected[i]->sock, &read_fds)) {
-                    printf("run_server: client %d is ready to read\n", i);
-                    char buffer[1024];
-                    ssize_t bytes_read = read(server->clients.connected[i]->sock, buffer, sizeof(buffer));
-                    if (bytes_read == -1) {
-                        perror("run_server: read failed");
-                        continue;
-                    }
-                    printf("run_server: client %d sent %s\n", i, buffer);
-                    send(server->clients.connected[i]->sock, buffer, bytes_read, 0);
-                }
-            }
-        }
-    }
+    while (1) 
+        process_server(server);
 }
