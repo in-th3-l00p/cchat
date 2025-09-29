@@ -64,7 +64,7 @@ static inline void process_clients_socket(
     fd_set* read_fds, 
     Server* server
 ) {
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    for (int i = 0; i <= server->clients.max_fd; i++) {
         if (server->clients.connected[i] != NULL) {
             if (FD_ISSET(server->clients.connected[i]->sock, read_fds)) {
                 process_client(read_fds, server, i);

@@ -114,10 +114,36 @@ static inline RecvStatus read_payload(Client* client) {
 }
 
 // process a fully-received message; here we echo it back with a length prefix
-static inline void handle_complete_message(Client* client) {
-    uint32_t netlen = htonl(client->payload_length);
-    send(client->sock, &netlen, 4, 0);
-    send(client->sock, client->payload_buf, client->payload_length, 0);
+static inline void handle_complete_message(
+    Server* server,
+    int client_index
+) {
+    printf(
+        "process_client: client %d complete message of %u bytes\n",
+        client_index,
+        server->clients.connected[client_index]->payload_length
+    );
+
+    for (int i = 0; i <= server->clients.max_fd; i++) {
+        Client* current_client = server->clients.connected[i];
+        if (current_client == NULL)
+            continue;
+        uint32_t netlen = htonl(current_client->payload_length);
+        send(current_client->sock, &netlen, 4, 0);    
+        send(
+            current_client->sock, 
+            current_client->payload_buf, 
+            current_client->payload_length, 
+            0
+        );
+
+        printf(
+            "process_client: client %d sent message to client %d of %u bytes\n",
+            client_index,
+            i,
+            current_client->payload_length
+        );
+    }
 }
 
 // reset receive state to accept next message
@@ -161,12 +187,10 @@ void process_client(
         client->payload_length > 0 && 
         client->payload_bytes_read == client->payload_length
     ) {
-        printf(
-            "process_client: client %d complete message of %u bytes\n",
-            client_index,
-            client->payload_length
+        handle_complete_message(
+            server,
+            client_index
         );
-        handle_complete_message(client);
         reset_receive_state(client);
     }
 }
