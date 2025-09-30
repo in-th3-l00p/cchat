@@ -118,20 +118,23 @@ static inline void handle_complete_message(
     Server* server,
     int client_index
 ) {
+    Client* current_client = server->clients.connected[client_index];
     printf(
         "process_client: client %d complete message of %u bytes\n",
         client_index,
-        server->clients.connected[client_index]->payload_length
+        current_client->payload_length
     );
 
     for (int i = 0; i <= server->clients.max_fd; i++) {
-        Client* current_client = server->clients.connected[i];
-        if (current_client == NULL)
+        Client* client = server->clients.connected[i];
+        if (client == NULL)
+            continue;
+        if (client == current_client)
             continue;
         uint32_t netlen = htonl(current_client->payload_length);
-        send(current_client->sock, &netlen, 4, 0);    
+        send(client->sock, &netlen, 4, 0);    
         send(
-            current_client->sock, 
+            client->sock, 
             current_client->payload_buf, 
             current_client->payload_length, 
             0
@@ -139,8 +142,8 @@ static inline void handle_complete_message(
 
         printf(
             "process_client: client %d sent message to client %d of %u bytes\n",
-            client_index,
-            i,
+            current_client->sock,
+            client->sock,
             current_client->payload_length
         );
     }
