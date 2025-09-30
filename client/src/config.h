@@ -1,0 +1,9 @@
+#ifndef _CLIENT_CONFIG_H_
+#define _CLIENT_CONFIG_H_
+
+#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_PORT "8080"
+#define MAX_MESSAGE_LENGTH 65536
+
+#endif
+
