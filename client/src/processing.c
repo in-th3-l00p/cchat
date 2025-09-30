@@ -106,21 +106,6 @@ void run_client(Client* client) {
             break;
         }
 
-        if (FD_ISSET(client->sock, &read_fds)) {
-            if (recv_header_and_prepare_payload(client) == -1) {
-                fprintf(stderr, "connection closed by server\n");
-                break;
-            }
-            if (recv_payload(client) == -1) {
-                fprintf(stderr, "connection closed by server\n");
-                break;
-            }
-            if (client->payload_length > 0 && client->payload_bytes_read == client->payload_length) {
-                handle_complete_message(client->payload_buf, client->payload_length);
-                reset_recv_state(client);
-            }
-        }
-
         if (FD_ISSET(stdin_fd, &read_fds)) {
             ssize_t line_len = getline(&line, &line_cap, stdin);
             if (line_len == -1) {
@@ -140,6 +125,25 @@ void run_client(Client* client) {
             if (client_send_message(client, (const uint8_t*)line, (uint32_t)line_len) == -1) {
                 fprintf(stderr, "send failed\n");
                 break;
+            }
+
+            // clear current line, move up, clear echoed input
+            fputs("\033[2K\r\033[1A\033[2K\r", stdout);
+            fflush(stdout);
+        }
+
+        if (FD_ISSET(client->sock, &read_fds)) {
+            if (recv_header_and_prepare_payload(client) == -1) {
+                fprintf(stderr, "connection closed by server\n");
+                break;
+            }
+            if (recv_payload(client) == -1) {
+                fprintf(stderr, "connection closed by server\n");
+                break;
+            }
+            if (client->payload_length > 0 && client->payload_bytes_read == client->payload_length) {
+                handle_complete_message(client->payload_buf, client->payload_length);
+                reset_recv_state(client);
             }
         }
     }
