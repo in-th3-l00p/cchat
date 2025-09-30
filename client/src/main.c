@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     }
 
     Client client = create_client(host, port);
-    fprintf(stdout, "connected to %s:%s, type messages and press Enter, Ctrl-D to quit.\n", host, port);
+    fprintf(stdout, "connected to %s:%s\n", host, port);
     fflush(stdout);
     run_client(&client);
     destroy_client(&client);

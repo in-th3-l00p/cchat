@@ -78,6 +78,11 @@ Client create_client(const char* host, const char* port) {
         fprintf(stderr, "failed to connect to %s:%s\n", host, port);
         exit(1);
     }
+    client.header_bytes_read = 0;
+    client.payload_buf = NULL;
+    client.payload_capacity = 0;
+    client.payload_length = 0;
+    client.payload_bytes_read = 0;
     return client;
 }
 
@@ -86,6 +91,11 @@ void destroy_client(Client* client) {
     if (client->sock >= 0) {
         close(client->sock);
         client->sock = -1;
+    }
+    if (client->payload_buf != NULL) {
+        free(client->payload_buf);
+        client->payload_buf = NULL;
+        client->payload_capacity = 0;
     }
 }
 
