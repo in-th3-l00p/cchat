@@ -56,7 +56,7 @@ static inline void process_server_socket(
         return;
     }
     printf("process_server: accepted connection from %s\n", inet_ntoa(sock.sin_addr));
-    add_client(&server->clients, sock_fd, U"");
+    add_client(&server->clients, sock_fd, "");
 }
 
 

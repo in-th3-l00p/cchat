@@ -20,7 +20,7 @@
 
 typedef struct Client {
     int sock;
-    char32_t name[MAX_NAME_LENGTH];
+    char name[MAX_NAME_LENGTH];
     uint8_t header_buf[4];
     uint32_t header_bytes_read;
     uint8_t* payload_buf;
@@ -40,8 +40,8 @@ typedef struct Clients {
 // function prototypes
 Clients create_client_container();
 void destroy_client_container(Clients* clients);
-int add_client(Clients* clients, int sock, const char32_t name[MAX_NAME_LENGTH]);
-void update_nickname(Clients* clients, int sock, const char32_t name[MAX_NAME_LENGTH]);
+int add_client(Clients* clients, int sock, const char name[MAX_NAME_LENGTH]);
+void update_nickname(Clients* clients, int sock, const char name[MAX_NAME_LENGTH]);
 void remove_client(Clients* clients, int sock);
 
 #endif

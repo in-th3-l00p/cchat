@@ -34,7 +34,7 @@ void destroy_client_container(Clients* clients) {
 int add_client(
     Clients* clients, 
     int sock, 
-    const char32_t name[MAX_NAME_LENGTH]
+    const char name[MAX_NAME_LENGTH]
 ) {
     if (
         sock < 0 || sock >= MAX_CLIENTS ||
@@ -52,7 +52,11 @@ int add_client(
         return -1;
     }
     clients->connected[sock]->sock = sock;
-    memcpy(clients->connected[sock]->name, name, sizeof(char32_t) * MAX_NAME_LENGTH);
+    memcpy(
+        clients->connected[sock]->name, 
+        name, 
+        sizeof(char) * MAX_NAME_LENGTH
+    );
     clients->connected[sock]->name[MAX_NAME_LENGTH - 1] = U'\0';
     clients->connected[sock]->header_bytes_read = 0;
     clients->connected[sock]->payload_buf = NULL;
@@ -68,7 +72,7 @@ int add_client(
 void update_nickname(
     Clients* clients, 
     int sock, 
-    const char32_t name[MAX_NAME_LENGTH]
+    const char name[MAX_NAME_LENGTH]
 ) {
     if (
         clients->connected[sock] == NULL ||
@@ -78,7 +82,11 @@ void update_nickname(
         errno = EINVAL;
         return;
     }
-    memcpy(clients->connected[sock]->name, name, sizeof(char32_t) * MAX_NAME_LENGTH);
+    memcpy(
+        clients->connected[sock]->name, 
+        name, 
+        sizeof(char) * MAX_NAME_LENGTH
+    );
 }
 
 void remove_client(Clients* clients, int sock) {

@@ -125,6 +125,25 @@ static inline void handle_complete_message(
         current_client->payload_length
     );
 
+    if (strlen(current_client->name) <= 0) {
+        if (strlen((char*)current_client->payload_buf) > MAX_NAME_LENGTH) {
+            return;
+        }
+
+        printf(
+            "process_client: client %d is setting its name to %s\n", 
+            current_client->sock, 
+            current_client->payload_buf
+        );
+
+        update_nickname(
+            &server->clients, 
+            current_client->sock, 
+            (char*)current_client->payload_buf
+        );
+        return;
+    }
+
     for (int i = 0; i <= server->clients.max_fd; i++) {
         Client* client = server->clients.connected[i];
         if (client == NULL)
