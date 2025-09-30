@@ -116,12 +116,11 @@ static inline RecvStatus read_payload(Client* client) {
 // process a fully-received message; here we echo it back with a length prefix
 static inline void handle_complete_message(
     Server* server,
-    int client_index
+    Client* current_client
 ) {
-    Client* current_client = server->clients.connected[client_index];
     printf(
         "process_client: client %d complete message of %u bytes\n",
-        client_index,
+        current_client->sock,
         current_client->payload_length
     );
 
@@ -148,22 +147,40 @@ static inline void handle_complete_message(
         Client* client = server->clients.connected[i];
         if (client == NULL)
             continue;
-        if (client == current_client)
+
+        const char* delim = ": ";
+        uint32_t name_len = (uint32_t)strlen(current_client->name);
+        uint32_t delim_len = 2;
+        uint32_t msg_len = current_client->payload_length;
+
+        uint32_t max_msg_len = MAX_MESSAGE_LENGTH;
+        uint32_t available_for_msg = (name_len + delim_len < max_msg_len)
+            ? (max_msg_len - name_len - delim_len)
+            : 0;
+        uint32_t msg_to_copy = msg_len > available_for_msg ? available_for_msg : msg_len;
+        uint32_t out_len = name_len + delim_len + msg_to_copy;
+
+        uint8_t* out = malloc(out_len);
+        if (out == NULL) {
+            perror("process_client: malloc failed");
             continue;
-        uint32_t netlen = htonl(current_client->payload_length);
-        send(client->sock, &netlen, 4, 0);    
-        send(
-            client->sock, 
-            current_client->payload_buf, 
-            current_client->payload_length, 
-            0
-        );
+        }
+
+        memcpy(out, current_client->name, name_len);
+        memcpy(out + name_len, delim, delim_len);
+        memcpy(out + name_len + delim_len, current_client->payload_buf, msg_to_copy);
+
+        uint32_t netlen = htonl(out_len);
+        send(client->sock, &netlen, 4, 0);
+        send(client->sock, out, out_len, 0);
+
+        free(out);
 
         printf(
-            "process_client: client %d sent message to client %d of %u bytes\n",
+            "process_client: client %d sent message to client %d of %u bytes (prefixed)\n",
             current_client->sock,
             client->sock,
-            current_client->payload_length
+            out_len
         );
     }
 }
@@ -211,7 +228,7 @@ void process_client(
     ) {
         handle_complete_message(
             server,
-            client_index
+            client
         );
         reset_receive_state(client);
     }
