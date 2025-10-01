@@ -1,6 +1,6 @@
 ## cchat
 
-tiny chat * one server, many clients * I/O multiplexing in C, and a gentle intro to network programming.
+tiny chat \w I/O multiplexing in C
 this project was made for writing an article on low level networking through multiplexing.
 
 ### general info
