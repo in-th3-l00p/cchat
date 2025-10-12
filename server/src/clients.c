@@ -65,7 +65,7 @@ int add_client(
     clients->connected[sock]->payload_bytes_read = 0;
     clients->count++;
     if (sock > clients->max_fd)
-        clients->max_fd = sock;
+        clients->max_fd = sock + 1;
     return 0;
 }
 
@@ -111,6 +111,6 @@ void remove_client(Clients* clients, int sock) {
         int new_max_fd = clients->max_fd - 1;
         while (new_max_fd >= 0 && clients->connected[new_max_fd] == NULL)
             new_max_fd--;
-        clients->max_fd = new_max_fd;
+        clients->max_fd = new_max_fd + 1;
     }
 }
