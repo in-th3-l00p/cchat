@@ -24,7 +24,7 @@ static inline fd_set get_read_fds(Server* server) {
     }
     int max_fd = server->clients.max_fd;
     if (server->clients.max_fd < 0)
-        max_fd = server->sock + 1;
+        max_fd = server->sock;
     max_fd++;
 
     int activity = select(
