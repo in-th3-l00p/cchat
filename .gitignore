@@ -1,3 +1,4 @@
 client/bin
 server/bin
 .vscode
+.idea

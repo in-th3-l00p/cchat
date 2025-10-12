@@ -193,15 +193,9 @@ static inline void reset_receive_state(Client* client) {
 }
 
 void process_client(
-    fd_set* read_fds,
     Server* server, 
     int client_index
 ) {
-    if (
-        server->clients.connected[client_index] == NULL || 
-        !FD_ISSET(server->clients.connected[client_index]->sock, read_fds)
-    )
-        return;
     Client* client = server->clients.connected[client_index];
 
     RecvStatus s = read_header_and_prepare_payload(client);
