@@ -27,18 +27,20 @@ static inline fd_set get_read_fds(Server* server) {
         max_fd = server->sock;
     max_fd++;
 
+    struct timeval timeout = {0};
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+
     int activity = select(
         max_fd, 
         &read_fds, 
         NULL, 
         NULL, 
-        NULL
+        &timeout
     );
 
     if (activity < 0)
         perror("get_read_fds: select failed");
-    else if (activity == 0)
-        printf("get_read_fds: select timed out\n");
     return read_fds;
 }
 
